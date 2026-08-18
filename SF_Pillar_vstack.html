@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>San Francisco Pillar — VTCNZE Urban Energy Infrastructure</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #87CEEB;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            max-width: 360px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #info h2 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        #info .subtitle {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+        #info p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        #info .note {
+            margin-top: 12px;
+            font-size: 11px;
+            color: #888;
+            border-top: 1px solid #444;
+            padding-top: 10px;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #controls button {
+            margin: 5px;
+            padding: 10px 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        #controls button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        #legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #legend h3 {
+            margin: 0 0 16px 0;
+            font-size: 17px;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        .legend-section {
+            margin-bottom: 15px;
+        }
+        .legend-section-title {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            border: 2px solid #fff;
+            border-radius: 3px;
+        }
+        #mode-toggle {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 16px 28px;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        #mode-toggle:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+        }
+        .zone-label {
+            position: absolute;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="mode-toggle" onclick="toggleDayNight()">
+        🌙 Switch to Resilience Mode (Night View)
+    </div>
+    
+    <div id="info">
+        <h2>San Francisco Pillar — VTCNZE</h2>
+        <div class="subtitle">Community-Anchored Grid Infrastructure</div>
+        <p><strong>Case A:</strong> Downtown Core (tall, slim)</p>
+        <p><strong>Case B:</strong> Mixed-Use Ring (medium, wider)</p>
+        <p><strong>Case C:</strong> Neighborhood Hubs (short, broad)</p>
+        <p><strong>Grid architecture:</strong> SMR-ready <em style="color:#aaa; font-size:11px;">(Phase 2+, pending state authorization)</em></p>
+        <div class="note">Equal capacity • Zoning-adapted design<br>Sodium-ion chemistry • No lithium • No cobalt<br>Phase 1: Battery storage infrastructure</div>
+        <p style="margin-top: 15px; color: #4CAF50; font-size: 12px;"><em>Drag to rotate • Scroll to zoom</em></p>
+    </div>
+
+    <div id="legend">
+        <h3>Infrastructure Key</h3>
+        
+        <div class="legend-section">
+            <div class="legend-section-title">V-Stack Towers</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #5a7d5a;"></div>
+                <span>Energy Storage (A/B/C)</span>
+            </div>
+        </div>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Grid Network</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFD700;"></div>
+                <span>Tower Interconnections</span>
+            </div>
+        </div>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Urban Context</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #666;"></div>
+                <span>Commercial/Industrial</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #999;"></div>
+                <span>Residential</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button onclick="resetCamera()">Reset View</button>
+        <button onclick="viewFromAbove()">Top View</button>
+        <button onclick="viewDowntown()">Downtown Core</button>
+        <button onclick="viewNeighborhood()">Neighborhood Hub</button>
+        <button onclick="toggleGrid()">Toggle Grid Floor</button>
+    </div>
+
+    <!-- Zone labels (will be positioned via JS) -->
+    <div id="zone-labels"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        let isNightMode = false;
+        scene.background = new THREE.Color(0x87CEEB); // Clear day sky
+        scene.fog = new THREE.Fog(0x87CEEB, 1000, 2800);
+
+        const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 1, 4000);
+        camera.position.set(1400, 900, 1400);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Lighting - Day mode (soft, realistic)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.85);
+        directionalLight.position.set(1000, 1400, 800);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.left = -1200;
+        directionalLight.shadow.camera.right = 1200;
+        directionalLight.shadow.camera.top = 1200;
+        directionalLight.shadow.camera.bottom = -1200;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        scene.add(directionalLight);
+
+        // Hemisphere light for realistic sky/ground ambient
+        const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x3a4a3a, 0.4);
+        scene.add(hemiLight);
+
+        // Ground - urban terrain
+        const groundGeometry = new THREE.PlaneGeometry(3500, 3500);
+        const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x3d4d3d });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Grid helper (subtle, toggle-able)
+        let gridHelper = new THREE.GridHelper(3500, 70, 0x555555, 0x444444);
+        gridHelper.position.y = 1;
+        gridHelper.material.opacity = 0.3;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+        let gridVisible = true;
+
+        // Building creation function
+        function createBuilding(x, z, width, depth, height, color, emissiveColor = 0x000000) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshLambertMaterial({ 
+                color: color,
+                emissive: emissiveColor,
+                emissiveIntensity: 0
+            });
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, height / 2, z);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            return building;
+        }
+
+        // Generate urban context buildings (more realistic distribution)
+        const buildings = [];
+        
+        // Downtown commercial
+        for (let i = 0; i < 40; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100 + Math.random() * 300;
+            const x = Math.cos(angle) * distance;
+            const z = Math.sin(angle) * distance;
+            const width = 35 + Math.random() * 45;
+            const depth = 35 + Math.random() * 45;
+            const height = 150 + Math.random() * 280;
+            const building = createBuilding(x, z, width, depth, height, 0x5a5a5a);
+            buildings.push(building);
+            scene.add(building);
+        }
+
+        // Mid-city mixed use
+        for (let i = 0; i < 60; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 400 + Math.random() * 400;
+            const x = Math.cos(angle) * distance;
+            const z = Math.sin(angle) * distance;
+            const width = 30 + Math.random() * 40;
+            const depth = 30 + Math.random() * 40;
+            const height = 80 + Math.random() * 180;
+            const building = createBuilding(x, z, width, depth, height, 0x707070);
+            buildings.push(building);
+            scene.add(building);
+        }
+
+        // Outer residential
+        for (let i = 0; i < 70; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 800 + Math.random() * 500;
+            const x = Math.cos(angle) * distance;
+            const z = Math.sin(angle) * distance;
+            const width = 25 + Math.random() * 35;
+            const depth = 25 + Math.random() * 35;
+            const height = 40 + Math.random() * 100;
+            const building = createBuilding(x, z, width, depth, height, 0x8a8a8a);
+            buildings.push(building);
+            scene.add(building);
+        }
+
+        // V-STACK TOWERS - Clear ABC Gradient
+        const towers = [];
+        const towerPositions = [];
+
+        // CASE A - Downtown Core (Tall & Slim) - Tighter cluster
+        const caseA_positions = [
+            [0, 0],
+            [-120, 0], [120, 0], [0, -120], [0, 120],
+            [-120, -120], [120, -120], [-120, 120], [120, 120]
+        ];
+        
+        caseA_positions.forEach(([baseX, baseZ]) => {
+            const x = baseX + (Math.random() - 0.5) * 25;
+            const z = baseZ + (Math.random() - 0.5) * 25;
+            const width = 30;
+            const depth = 30;
+            const height = 520 + Math.random() * 60; // Tallest
+            
+            const tower = createBuilding(x, z, width, depth, height, 0x5a7d5a, 0x2a4a2a);
+            tower.userData = { type: 'caseA', capacity: '5 GWh', zone: 'Downtown Core' };
+            towers.push(tower);
+            towerPositions.push({ x, z, height, type: 'A' });
+            scene.add(tower);
+
+            // Subtle edge highlighting (not glowing, just visible)
+            const edgesMaterial = new THREE.LineBasicMaterial({ 
+                color: 0x7a9a7a, 
+                linewidth: 1,
+                transparent: true,
+                opacity: 0.6
+            });
+            const edgesGeometry = new THREE.EdgesGeometry(tower.geometry);
+            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+            tower.add(edges);
+        });
+
+        // CASE B - Mixed-Use Ring (Medium, Wider) - Clear ring pattern
+        const caseB_count = 18;
+        const caseB_radius = 450;
+        
+        for (let i = 0; i < caseB_count; i++) {
+            const angle = (i / caseB_count) * Math.PI * 2;
+            const x = Math.cos(angle) * caseB_radius + (Math.random() - 0.5) * 40;
+            const z = Math.sin(angle) * caseB_radius + (Math.random() - 0.5) * 40;
+            const width = 48;
+            const depth = 48;
+            const height = 340 + Math.random() * 40;
+            
+            const tower = createBuilding(x, z, width, depth, height, 0x5a7d5a, 0x2a4a2a);
+            tower.userData = { type: 'caseB', capacity: '5 GWh', zone: 'Mixed-Use Ring' };
+            towers.push(tower);
+            towerPositions.push({ x, z, height, type: 'B' });
+            scene.add(tower);
+
+            const edgesMaterial = new THREE.LineBasicMaterial({ 
+                color: 0x7a9a7a, 
+                linewidth: 1,
+                transparent: true,
+                opacity: 0.6
+            });
+            const edgesGeometry = new THREE.EdgesGeometry(tower.geometry);
+            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+            tower.add(edges);
+        }
+
+        // CASE C - Neighborhood Hubs (Short & Wide) - Outer ring, water tower aesthetic
+        const caseC_positions = [
+            // Cardinal positions
+            [0, -950], [0, 950], [-950, 0], [950, 0],
+            // Diagonal positions
+            [-750, -750], [750, -750], [-750, 750], [750, 750],
+            // Additional neighborhood positions
+            [-500, -950], [500, -950], [-500, 950], [500, 950],
+            [-950, -500], [950, -500], [-950, 500], [950, 500]
+        ];
+        
+        caseC_positions.forEach(([baseX, baseZ]) => {
+            const x = baseX + (Math.random() - 0.5) * 50;
+            const z = baseZ + (Math.random() - 0.5) * 50;
+            const width = 70;
+            const depth = 70;
+            const height = 160 + Math.random() * 25; // Much shorter, civic infrastructure feel
+            
+            const tower = createBuilding(x, z, width, depth, height, 0x5a7d5a, 0x2a4a2a);
+            tower.userData = { type: 'caseC', capacity: '5 GWh', zone: 'Neighborhood Hub' };
+            towers.push(tower);
+            towerPositions.push({ x, z, height, type: 'C' });
+            scene.add(tower);
+
+            const edgesMaterial = new THREE.LineBasicMaterial({ 
+                color: 0x7a9a7a, 
+                linewidth: 1,
+                transparent: true,
+                opacity: 0.6
+            });
+            const edgesGeometry = new THREE.EdgesGeometry(tower.geometry);
+            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+            tower.add(edges);
+        });
+
+        // GRID CONNECTIONS - Orderly, Intentional, AI-Orchestrated
+        const gridConnections = new THREE.Group();
+
+        // V-Stack mesh network (redundant, managed)
+        const connectionMaterial = new THREE.LineBasicMaterial({ 
+            color: 0xFFD700, 
+            linewidth: 2,
+            transparent: true,
+            opacity: 0.4
+        });
+
+        // Strategic connections (not every tower to every tower - intentional topology)
+        towerPositions.forEach((tower1, i) => {
+            // Connect to nearest neighbors only (creates resilient mesh without chaos)
+            const nearestNeighbors = [...towerPositions]
+                .map((t, idx) => ({
+                    ...t,
+                    index: idx,
+                    distance: Math.sqrt(
+                        Math.pow(tower1.x - t.x, 2) + 
+                        Math.pow(tower1.z - t.z, 2)
+                    )
+                }))
+                .filter(t => t.index !== i && t.distance > 10)
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, 3); // Only connect to 3 nearest neighbors
+
+            nearestNeighbors.forEach(tower2 => {
+                const points = [
+                    new THREE.Vector3(tower1.x, 18, tower1.z),
+                    new THREE.Vector3(tower2.x, 18, tower2.z)
+                ];
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(geometry, connectionMaterial);
+                gridConnections.add(line);
+            });
+        });
+
+        scene.add(gridConnections);
+
+        // Mouse controls
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraRotation = { x: 0.55, y: 0.75 };
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                cameraRotation.y += deltaX * 0.005;
+                cameraRotation.x += deltaY * 0.005;
+                
+                cameraRotation.x = Math.max(0.15, Math.min(Math.PI / 2 - 0.1, cameraRotation.x));
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Zoom controls
+        let cameraDistance = 2000;
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            cameraDistance += e.deltaY * 0.8;
+            cameraDistance = Math.max(500, Math.min(3200, cameraDistance));
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update camera position
+            camera.position.x = cameraDistance * Math.cos(cameraRotation.x) * Math.sin(cameraRotation.y);
+            camera.position.y = cameraDistance * Math.sin(cameraRotation.x) + 200;
+            camera.position.z = cameraDistance * Math.cos(cameraRotation.x) * Math.cos(cameraRotation.y);
+            camera.lookAt(0, 100, 0);
+            
+            renderer.render(scene, camera);
+        }
+
+        // Control functions
+        function resetCamera() {
+            cameraDistance = 2000;
+            cameraRotation = { x: 0.55, y: 0.75 };
+        }
+
+        function viewFromAbove() {
+            cameraRotation = { x: Math.PI / 2 - 0.15, y: 0 };
+            cameraDistance = 2400;
+        }
+
+        function viewDowntown() {
+            cameraRotation = { x: 0.35, y: 0 };
+            cameraDistance = 700;
+            camera.lookAt(0, 250, 0);
+        }
+
+        function viewNeighborhood() {
+            cameraRotation = { x: 0.25, y: Math.PI / 4 };
+            cameraDistance = 900;
+            camera.lookAt(750, 80, 750);
+        }
+
+        function toggleGrid() {
+            gridVisible = !gridVisible;
+            gridHelper.visible = gridVisible;
+        }
+
+        function toggleDayNight() {
+            isNightMode = !isNightMode;
+            
+            if (isNightMode) {
+                // NIGHT MODE - Resilience Visualization
+                scene.background = new THREE.Color(0x0a0a1a);
+                scene.fog.color = new THREE.Color(0x0a0a1a);
+                ambientLight.intensity = 0.12;
+                directionalLight.intensity = 0.08;
+                hemiLight.intensity = 0.05;
+                
+                // V-Stacks glow softly (they're operational during outage)
+                towers.forEach(tower => {
+                    tower.material.emissiveIntensity = 0.35;
+                });
+                
+                // Grid connections become more visible
+                gridConnections.children.forEach(line => {
+                    if (line.material.color.getHex() === 0xFFD700) {
+                        line.material.opacity = 0.7;
+                    } else {
+                        line.material.opacity = 0.8;
+                    }
+                });
+                
+                // Regular buildings go dark (simulates outage)
+                buildings.forEach(building => {
+                    building.material.color = new THREE.Color(0x0f0f0f);
+                    building.material.emissive = new THREE.Color(0x000000);
+                });
+                
+                document.getElementById('mode-toggle').innerHTML = '☀️ Switch to Day View';
+                
+            } else {
+                // DAY MODE - Normal Operation
+                scene.background = new THREE.Color(0x87CEEB);
+                scene.fog.color = new THREE.Color(0x87CEEB);
+                ambientLight.intensity = 0.65;
+                directionalLight.intensity = 0.85;
+                hemiLight.intensity = 0.4;
+                
+                // Reset V-Stacks to minimal emissive
+                towers.forEach(tower => {
+                    tower.material.emissiveIntensity = 0;
+                });
+                
+                // Reset grid connections
+                gridConnections.children.forEach(line => {
+                    if (line.material.color.getHex() === 0xFFD700) {
+                        line.material.opacity = 0.4;
+                    } else {
+                        line.material.opacity = 0.5;
+                    }
+                });
+                
+                // Reset buildings to normal colors
+                buildings.forEach((building, i) => {
+                    if (i < 40) {
+                        building.material.color = new THREE.Color(0x5a5a5a);
+                    } else if (i < 100) {
+                        building.material.color = new THREE.Color(0x707070);
+                    } else {
+                        building.material.color = new THREE.Color(0x8a8a8a);
+                    }
+                });
+                
+                document.getElementById('mode-toggle').innerHTML = '🌙 Switch to Resilience Mode (Night View)';
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
